@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Sundering Spire</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="game-surface" aria-label="The Sundering Spire prototype">
+        <header class="hud">
+          <div class="brand-block">
+            <span class="floor-tag">Floor 01</span>
+            <h1>The Sundering Spire</h1>
+          </div>
+          <div class="hero-strip" aria-live="polite">
+            <div class="hero-meter sela">
+              <span>Sela</span>
+              <div class="hearts" id="selaHearts"></div>
+              <div class="pip-row" id="selaPips"></div>
+            </div>
+            <div class="hero-meter kade">
+              <span>Kade</span>
+              <div class="hearts" id="kadeHearts"></div>
+              <div class="pip-row" id="kadePips"></div>
+            </div>
+          </div>
+        </header>
+
+        <canvas id="game" width="960" height="576"></canvas>
+
+        <footer class="command-bar">
+          <div id="statusLine">Find the mirror relay.</div>
+          <button id="resetButton" type="button" title="Reset floor">Reset</button>
+        </footer>
+      </section>
+
+      <aside class="run-panel">
+        <h2>Trial State</h2>
+        <ol class="objectives" id="objectives">
+          <li data-key="mirror">Mirror relay dormant</li>
+          <li data-key="sentry">Stone Sentry active</li>
+          <li data-key="gate">Stair gate sealed</li>
+        </ol>
+        <div class="system-readout">
+          <span>Light</span>
+          <meter id="lightMeter" min="0" max="100" value="100"></meter>
+          <span>Echo</span>
+          <meter id="echoMeter" min="0" max="100" value="100"></meter>
+        </div>
+      </aside>
+    </main>
+    <script src="src/game.js" defer></script>
+  </body>
+</html>

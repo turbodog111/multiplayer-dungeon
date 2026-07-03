@@ -17,3 +17,6 @@ npm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Local generated concept art stays out of shared builds until selected.
+assets/concept-art/
