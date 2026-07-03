@@ -1,9 +1,12 @@
 // Sela, the Lumen — the light / present hero.
 //
 // Data-only definition (validated by ../characters/validate.js). Sela sees and
-// reveals: she is slower and light-bound, but nothing hidden stays hidden once
-// she shines. In combat she opens enemies up for Kade and lands bright,
-// close-range finishers. See the design doc, section 2.
+// reveals: she is faster but squishier and light-bound. In combat she opens
+// enemies up (big stagger, low damage) for Kade and lands fast, frequent hits.
+// See the design doc, section 2. Combat math lives in ./combat.js.
+//
+// Balance sketch: nimble support / opener. Low HP, high speed, crits OFTEN (15%)
+// but for a modest x2. Her specials stagger hard rather than hit hard.
 
 export const sela = {
   id: 'sela',
@@ -14,6 +17,13 @@ export const sela = {
   timeAffinity: 'present',
   signatureHue: '#f5b942', // warm amber — identity only, not a combat rule
   pronouns: 'she/her',
+
+  stats: {
+    maxHealth: 90, // squishier than Kade
+    moveSpeed: 1.15, // faster than Kade (relative multiplier, 1.0 = baseline)
+    critChance: 0.15, // crits often...
+    critMultiplier: 2.0, // ...but for a standard x2
+  },
 
   traits: {
     summary:
@@ -66,8 +76,9 @@ export const sela = {
     },
   ],
 
-  // Moves: grounded normals for brawling + opening enemies up, plus power specials.
-  // Kade shares NONE of these ids — the two heroes fight with different moves.
+  // Moves. Every move carries: damage, staggerDamage (fills an enemy's stagger
+  // meter — see ./combat.js DEFAULT_STAGGER_THRESHOLD), critEligible, windupMs,
+  // and a cooldownMs (0 = spammable). Kade shares NONE of these ids.
   moves: [
     {
       id: 'sela_jab',
@@ -75,7 +86,10 @@ export const sela = {
       type: 'normal',
       kind: 'punch',
       damage: 4,
+      staggerDamage: 3,
+      critEligible: true,
       windupMs: 120,
+      cooldownMs: 0,
       description: 'A fast, bright one-two to the face. Cheap and spammable to chip health.',
     },
     {
@@ -84,7 +98,10 @@ export const sela = {
       type: 'normal',
       kind: 'kick',
       damage: 7,
+      staggerDamage: 6,
+      critEligible: true,
       windupMs: 300,
+      cooldownMs: 900,
       description: 'A wheeling kick that knocks a lone enemy back and buys space.',
     },
     {
@@ -93,7 +110,10 @@ export const sela = {
       type: 'normal',
       kind: 'dodge',
       damage: 0,
+      staggerDamage: 0,
+      critEligible: false,
       windupMs: 0,
+      cooldownMs: 1200,
       description: 'A short burst of speed through and past an enemy — her main way to reposition.',
     },
     {
@@ -103,11 +123,12 @@ export const sela = {
       kind: 'power',
       ability: 'torchbearer',
       damage: 3,
+      staggerDamage: 22, // huge stagger — the classic "open the window" move
+      critEligible: false,
+      windupMs: 150,
       cooldownMs: 4000,
-      staggers: true,
       description:
-        'A blinding burst that stuns enemies in front of her — the classic "open the window" ' +
-        'move that sets up Kade\'s takedown strike.',
+        'A blinding burst that stuns enemies in front of her — sets up Kade\'s takedown strike.',
     },
     {
       id: 'sela_sunbeam',
@@ -116,6 +137,9 @@ export const sela = {
       kind: 'power',
       ability: 'beamweave',
       damage: 12,
+      staggerDamage: 8,
+      critEligible: true,
+      windupMs: 500,
       cooldownMs: 6000,
       description:
         'A focused lance of light, bounced off prisms to hit a switch or a foe Kade has pinned.',
@@ -127,8 +151,10 @@ export const sela = {
       kind: 'power',
       ability: 'anchor',
       damage: 9,
+      staggerDamage: 25, // pins a staggered enemy for the finisher
+      critEligible: false,
+      windupMs: 450,
       cooldownMs: 8000,
-      staggers: true,
       description:
         'Drives a light-beacon into the ground, pinning a staggered enemy in place for the finisher.',
     },
@@ -174,6 +200,10 @@ export const sela = {
     lowHealth: [
       'My light\'s guttering — cover me!',
       'I can\'t take another like that.',
+    ],
+    critLanded: [
+      'Right in the dark of it!',
+      'Blazing!',
     ],
   },
 };

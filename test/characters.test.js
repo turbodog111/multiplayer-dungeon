@@ -65,6 +65,23 @@ test('every special move is wired to one of the hero\'s own abilities', () => {
   }
 });
 
+test('stats encode the intended contrast: Sela nimble/squishy, Kade tanky/heavy', () => {
+  // Sela: less health, more speed, crits more often.
+  assert.ok(sela.stats.maxHealth < kade.stats.maxHealth, 'Sela should have less health');
+  assert.ok(sela.stats.moveSpeed > kade.stats.moveSpeed, 'Sela should be faster');
+  assert.ok(sela.stats.critChance > kade.stats.critChance, 'Sela should crit more often');
+  // Kade: bigger crit payoff and a harder-hitting best special.
+  assert.ok(kade.stats.critMultiplier > sela.stats.critMultiplier, 'Kade should crit harder');
+  const selaTop = Math.max(...sela.moves.map((m) => m.damage));
+  const kadeTop = Math.max(...kade.moves.map((m) => m.damage));
+  assert.ok(kadeTop > selaTop, 'Kade\'s best hit should beat Sela\'s');
+});
+
+test('Sela\'s openers stagger harder than they hurt (she sets up, Kade finishes)', () => {
+  const flash = sela.moves.find((m) => m.id === 'sela_flash');
+  assert.ok(flash.staggerDamage > flash.damage, 'Light-Flash should stagger >> damage');
+});
+
 test('the registry exposes both heroes by id', () => {
   assert.equal(getCharacter('sela'), sela);
   assert.equal(getCharacter('kade'), kade);

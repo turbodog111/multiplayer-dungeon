@@ -1,10 +1,12 @@
 // Kade, the Echo — the shadow / past hero.
 //
 // Data-only definition (validated by ../characters/validate.js). Kade moves and
-// manipulates time: he can rewind a broken thing, step into the room's past, and
-// slip between shadows — but he's blind in the dark and reveals nothing himself.
-// In combat he's the finisher, striking through the openings Sela creates.
-// See the design doc, section 2.
+// manipulates time. In combat he's the finisher: slower and tankier than Sela,
+// he strikes through the openings she creates and hits HARD. See the design
+// doc, section 2. Combat math lives in ./combat.js.
+//
+// Balance sketch: heavy finisher. High HP, low speed, crits RARELY (10%) but for
+// a brutal x2.25. His specials hit hard rather than stagger hard.
 
 export const kade = {
   id: 'kade',
@@ -15,6 +17,13 @@ export const kade = {
   timeAffinity: 'past',
   signatureHue: '#7b5cff', // cool violet — identity only, not a combat rule
   pronouns: 'he/him',
+
+  stats: {
+    maxHealth: 115, // tankier than Sela
+    moveSpeed: 0.9, // slower than Sela
+    critChance: 0.1, // crits rarely...
+    critMultiplier: 2.25, // ...but hits like a truck when he does
+  },
 
   traits: {
     summary:
@@ -68,8 +77,8 @@ export const kade = {
     },
   ],
 
-  // Moves: heavier grounded normals + power specials. Shares NO ids with Sela —
-  // the two heroes brawl and finish with completely different moves.
+  // Moves. Heavier and slower than Sela's, hitting harder for the finish. Shares
+  // NO ids with Sela — the two heroes brawl and finish with different moves.
   moves: [
     {
       id: 'kade_backhand',
@@ -77,7 +86,10 @@ export const kade = {
       type: 'normal',
       kind: 'punch',
       damage: 6,
+      staggerDamage: 5,
+      critEligible: true,
       windupMs: 220,
+      cooldownMs: 0,
       description: 'A heavy backhand that lands harder than Sela\'s jab but swings slower.',
     },
     {
@@ -86,7 +98,10 @@ export const kade = {
       type: 'normal',
       kind: 'kick',
       damage: 8,
+      staggerDamage: 10,
+      critEligible: true,
       windupMs: 360,
+      cooldownMs: 1100,
       description: 'A low sweeping kick that trips grounded enemies and knocks them prone.',
     },
     {
@@ -95,7 +110,10 @@ export const kade = {
       type: 'normal',
       kind: 'grab',
       damage: 2,
+      staggerDamage: 15, // the setup half of many takedown chains
+      critEligible: false,
       windupMs: 250,
+      cooldownMs: 1500,
       description: 'Seizes and holds an enemy in place — the setup half of many takedown chains.',
     },
     {
@@ -104,7 +122,10 @@ export const kade = {
       type: 'special',
       kind: 'power',
       ability: 'phase',
-      damage: 14,
+      damage: 14, // his hardest hit — the standard finisher
+      staggerDamage: 12,
+      critEligible: true,
+      windupMs: 350,
       cooldownMs: 6000,
       description:
         'Phases behind a stunned enemy and lands the heavy hit only he can — the standard ' +
@@ -117,6 +138,9 @@ export const kade = {
       kind: 'power',
       ability: 'rewind',
       damage: 11,
+      staggerDamage: 8,
+      critEligible: true,
+      windupMs: 600,
       cooldownMs: 7000,
       description:
         'Rewinds an enemy\'s own broken weapon or pillar-arm back into place, then turns it ' +
@@ -129,6 +153,9 @@ export const kade = {
       kind: 'power',
       ability: 'shadowstep',
       damage: 7,
+      staggerDamage: 6,
+      critEligible: true,
+      windupMs: 200,
       cooldownMs: 5000,
       description:
         'Steps out of a shadow Sela has cast and strikes from the blind side. Repositions and ' +
@@ -176,6 +203,10 @@ export const kade = {
     lowHealth: [
       'I\'m fading — don\'t lose me in the dark.',
       'One more hit and I\'m an echo myself.',
+    ],
+    critLanded: [
+      'That one landed in both times.',
+      'Stay down.',
     ],
   },
 };

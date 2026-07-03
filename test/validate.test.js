@@ -18,6 +18,12 @@ function makeValidCharacter() {
     element: 'light',
     timeAffinity: 'present',
     signatureHue: '#f5b942',
+    stats: {
+      maxHealth: 100,
+      moveSpeed: 1.0,
+      critChance: 0.15,
+      critMultiplier: 2.0,
+    },
     traits: {
       summary: 'A stand-in hero for tests.',
       voice: 'Plain and direct.',
@@ -27,9 +33,9 @@ function makeValidCharacter() {
       { id: 'torch', name: 'Torch', description: 'Lights the way.', cooldownMs: 0 },
     ],
     moves: [
-      { id: 'jab', name: 'Jab', type: 'normal', kind: 'punch', damage: 4 },
-      { id: 'kick', name: 'Kick', type: 'normal', kind: 'kick', damage: 6 },
-      { id: 'flash', name: 'Flash', type: 'special', kind: 'power', damage: 12, ability: 'torch' },
+      { id: 'jab', name: 'Jab', type: 'normal', kind: 'punch', damage: 4, staggerDamage: 3, critEligible: true },
+      { id: 'kick', name: 'Kick', type: 'normal', kind: 'kick', damage: 6, staggerDamage: 5, critEligible: true },
+      { id: 'flash', name: 'Flash', type: 'special', kind: 'power', damage: 12, staggerDamage: 8, critEligible: false, ability: 'torch', cooldownMs: 4000 },
     ],
     sayings: Object.fromEntries(
       REQUIRED_SAYING_CATEGORIES.map((cat) => [cat, [`${cat} line`]]),
@@ -149,4 +155,71 @@ test('requires every mandatory saying category to be present and non-empty', () 
   const result = validateCharacter(c);
   assert.equal(result.valid, false);
   assert.ok(result.errors.some((e) => e.includes(dropped)));
+});
+
+// --- Combat stats -----------------------------------------------------------
+
+test('requires a stats block', () => {
+  const c = makeValidCharacter();
+  delete c.stats;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('stats')));
+});
+
+test('rejects a non-positive maxHealth', () => {
+  const c = makeValidCharacter();
+  c.stats.maxHealth = 0;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('maxHealth')));
+});
+
+test('rejects a non-positive moveSpeed', () => {
+  const c = makeValidCharacter();
+  c.stats.moveSpeed = -1;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('moveSpeed')));
+});
+
+test('rejects a critChance outside 0..1', () => {
+  const c = makeValidCharacter();
+  c.stats.critChance = 1.5;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('critChance')));
+});
+
+test('rejects a critMultiplier below 1', () => {
+  const c = makeValidCharacter();
+  c.stats.critMultiplier = 0.5;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('critMultiplier')));
+});
+
+test('rejects a move with negative staggerDamage', () => {
+  const c = makeValidCharacter();
+  c.moves[0].staggerDamage = -3;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('staggerDamage')));
+});
+
+test('rejects a move whose critEligible is not a boolean', () => {
+  const c = makeValidCharacter();
+  c.moves[0].critEligible = 'yes';
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('critEligible')));
+});
+
+test('rejects a special move with a negative cooldown', () => {
+  const c = makeValidCharacter();
+  const special = c.moves.find((m) => m.type === 'special');
+  special.cooldownMs = -500;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('cooldown')));
 });
