@@ -1,0 +1,10 @@
+{
+  "name": "multiplayer-dungeon",
+  "version": "0.0.1",
+  "description": "Two-player online co-op dungeon/puzzle/action game (16-bit retro).",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
