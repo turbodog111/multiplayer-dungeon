@@ -1,0 +1,19 @@
+# Local Claude Code config / cache (personal, not shared)
+.claude/
+
+# Node / build
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+
+# Env / secrets
+.env
+.env.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
