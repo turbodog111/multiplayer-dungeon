@@ -53,6 +53,28 @@ export function validateCharacter(character) {
     errors.push('signatureHue must be a 6-digit hex color (e.g. #f5b942)');
   }
 
+  // --- Combat stats -------------------------------------------------------
+  // Each entry: [field, predicate, message]. Keeps the block short as it grows.
+  const STAT_RULES = [
+    ['maxHealth', (v) => typeof v === 'number' && v > 0, 'must be a number > 0'],
+    ['moveSpeed', (v) => typeof v === 'number' && v > 0, 'must be a number > 0'],
+    ['critChance', (v) => typeof v === 'number' && v >= 0 && v <= 1, 'must be a number between 0 and 1'],
+    ['critMultiplier', (v) => typeof v === 'number' && v >= 1, 'must be a number >= 1'],
+    ['defense', (v) => typeof v === 'number' && v >= 0, 'must be a number >= 0'],
+    ['maxStamina', (v) => typeof v === 'number' && v > 0, 'must be a number > 0'],
+    ['staminaRegen', (v) => typeof v === 'number' && v >= 0, 'must be a number >= 0 (per second)'],
+    ['attackSpeed', (v) => typeof v === 'number' && v > 0, 'must be a number > 0 (windup multiplier)'],
+    ['reviveTimeMs', (v) => typeof v === 'number' && v >= 0, 'must be a number >= 0'],
+  ];
+  const stats = character.stats;
+  if (stats === null || typeof stats !== 'object') {
+    errors.push('stats must be an object (maxHealth, moveSpeed, critChance, critMultiplier, defense, maxStamina, staminaRegen, attackSpeed, reviveTimeMs)');
+  } else {
+    for (const [field, ok, msg] of STAT_RULES) {
+      if (!ok(stats[field])) errors.push(`stats.${field} ${msg}`);
+    }
+  }
+
   // --- Traits -------------------------------------------------------------
   const traits = character.traits;
   if (traits === null || typeof traits !== 'object') {
@@ -120,12 +142,24 @@ export function validateCharacter(character) {
       if (typeof move.damage !== 'number' || move.damage < 0) {
         errors.push(`move ${move.id} damage must be a number >= 0`);
       }
-      // A special move draws on one of the hero's abilities.
+      if (typeof move.staggerDamage !== 'number' || move.staggerDamage < 0) {
+        errors.push(`move ${move.id} staggerDamage must be a number >= 0`);
+      }
+      if (typeof move.critEligible !== 'boolean') {
+        errors.push(`move ${move.id} critEligible must be a boolean`);
+      }
+      if (typeof move.staminaCost !== 'number' || move.staminaCost < 0) {
+        errors.push(`move ${move.id} staminaCost must be a number >= 0`);
+      }
+      // A special move draws on one of the hero's abilities and has a cooldown.
       if (move.type === 'special') {
         if (!isNonEmptyString(move.ability)) {
           errors.push(`special move ${move.id} must name the ability it draws on`);
         } else if (!abilityIds.has(move.ability)) {
           errors.push(`special move ${move.id} references unknown ability: ${move.ability}`);
+        }
+        if (typeof move.cooldownMs !== 'number' || move.cooldownMs < 0) {
+          errors.push(`special move ${move.id} cooldownMs must be a number >= 0`);
         }
       }
     }

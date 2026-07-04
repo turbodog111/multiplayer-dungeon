@@ -1,56 +1,117 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>The Sundering Spire</title>
-    <link rel="stylesheet" href="styles.css">
-  </head>
-  <body>
-    <main class="app-shell">
-      <section class="game-surface" aria-label="The Sundering Spire prototype">
-        <header class="hud">
-          <div class="brand-block">
-            <span class="floor-tag">Floor 01</span>
-            <h1>The Sundering Spire</h1>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Sundering Spire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/ui/styles.css">
+</head>
+<body>
+  <div class="seam" aria-hidden="true"></div>
+
+  <main id="app">
+    <section class="screen is-active" data-screen="title">
+      <div class="title-stack">
+        <p class="eyebrow">Two keepers - one ascent</p>
+        <h1 class="game-title">
+          <span class="t-light">THE SUNDERING</span><span class="t-shadow">SPIRE</span>
+        </h1>
+        <p class="tagline">Light cannot climb without shadow. Shadow cannot see without light.</p>
+
+        <nav class="menu" aria-label="Main menu">
+          <button class="btn btn-play" data-event="PLAY">Play</button>
+          <button class="btn" data-event="OPEN_CONTROLS">Controls</button>
+        </nav>
+
+        <div class="roster">
+          <div class="hero hero-sela">
+            <span class="hero-mark">S</span>
+            <span class="hero-name">Sela</span>
+            <span class="hero-role">the Lumen - light / present</span>
           </div>
-          <div class="hero-strip" aria-live="polite">
-            <div class="hero-meter sela">
-              <span>Sela</span>
-              <div class="hearts" id="selaHearts"></div>
-              <div class="pip-row" id="selaPips"></div>
-            </div>
-            <div class="hero-meter kade">
-              <span>Kade</span>
-              <div class="hearts" id="kadeHearts"></div>
-              <div class="pip-row" id="kadePips"></div>
-            </div>
+          <div class="hero hero-kade">
+            <span class="hero-mark">K</span>
+            <span class="hero-name">Kade</span>
+            <span class="hero-role">the Echo - shadow / past</span>
           </div>
-        </header>
-
-        <canvas id="game" width="960" height="576"></canvas>
-
-        <footer class="command-bar">
-          <div id="statusLine">Find the mirror relay.</div>
-          <button id="resetButton" type="button" title="Reset floor">Reset</button>
-        </footer>
-      </section>
-
-      <aside class="run-panel">
-        <h2>Trial State</h2>
-        <ol class="objectives" id="objectives">
-          <li data-key="mirror">Mirror relay dormant</li>
-          <li data-key="sentry">Stone Sentry active</li>
-          <li data-key="gate">Stair gate sealed</li>
-        </ol>
-        <div class="system-readout">
-          <span>Light</span>
-          <meter id="lightMeter" min="0" max="100" value="100"></meter>
-          <span>Echo</span>
-          <meter id="echoMeter" min="0" max="100" value="100"></meter>
         </div>
-      </aside>
-    </main>
-    <script src="src/game.js" defer></script>
-  </body>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="controls">
+      <div class="panel">
+        <h2 class="panel-title">Controls</h2>
+        <div class="controls-grid">
+          <div class="ctrl-col ctrl-sela">
+            <h3>Player 1 - Sela</h3>
+            <dl>
+              <dt>Move</dt><dd>W A S D</dd>
+              <dt>Jab</dt><dd>J</dd>
+              <dt>Spin kick</dt><dd>K</dd>
+              <dt>Light-Flash</dt><dd>U</dd>
+            </dl>
+          </div>
+          <div class="ctrl-col ctrl-kade">
+            <h3>Player 2 - Kade</h3>
+            <dl>
+              <dt>Move</dt><dd>Arrow keys</dd>
+              <dt>Backhand</dt><dd>, (comma)</dd>
+              <dt>Sweep</dt><dd>. (period)</dd>
+              <dt>Phase-Strike</dt><dd>/ (slash)</dd>
+            </dl>
+          </div>
+        </div>
+        <p class="controls-note">Pause any time with <kbd>Esc</kbd>. Rebinding comes later.</p>
+        <button class="btn" data-event="BACK">Back</button>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="playing">
+      <div class="hud">
+        <div class="hud-right">
+          <span class="floor-badge">Floor <b data-stat="floor">1</b> / 12</span>
+          <span class="score-badge">Score <b data-stat="score">0</b></span>
+          <button class="btn btn-small" data-event="PAUSE">Pause</button>
+        </div>
+      </div>
+
+      <canvas id="game-canvas" width="720" height="420" aria-label="The dungeon room"></canvas>
+
+      <p class="play-hint">
+        <b class="p1">P1 Sela</b> - WASD move - <kbd>J</kbd> jab - <kbd>K</kbd> kick - <kbd>U</kbd> Light-Flash
+        <span class="hint-separator"> | </span>
+        <b class="p2">P2 Kade</b> - Arrows move - <kbd>,</kbd> strike - <kbd>.</kbd> sweep - <kbd>/</kbd> Phase-Strike
+      </p>
+    </section>
+
+    <section class="screen screen-overlay" data-screen="paused">
+      <div class="panel panel-narrow">
+        <h2 class="panel-title">Paused</h2>
+        <nav class="menu" aria-label="Pause menu">
+          <button class="btn btn-play" data-event="RESUME">Resume</button>
+          <button class="btn" data-event="OPEN_CONTROLS">Controls</button>
+          <button class="btn" data-event="RESTART">Restart run</button>
+          <button class="btn btn-danger" data-event="QUIT">Quit to title</button>
+        </nav>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="summary">
+      <div class="panel">
+        <h2 class="panel-title">Run Over</h2>
+        <p class="summary-score">Final score <b data-stat="score">0</b></p>
+        <div class="summary-grid" data-goals></div>
+        <nav class="menu menu-row">
+          <button class="btn btn-play" data-event="RETRY">Try again</button>
+          <button class="btn" data-event="CONTINUE">Title screen</button>
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="src/ui/app.js"></script>
+</body>
 </html>
