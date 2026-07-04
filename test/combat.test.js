@@ -6,6 +6,10 @@ import {
   rollCrit,
   resolveAttack,
   applyDamage,
+  mitigateDamage,
+  effectiveWindup,
+  regenStamina,
+  spendStamina,
   createCooldownTracker,
   DEFAULT_STAGGER_THRESHOLD,
 } from '../src/characters/combat.js';
@@ -77,6 +81,43 @@ test('applyDamage subtracts from current health', () => {
 
 test('applyDamage clamps at zero (no negative health)', () => {
   assert.equal(applyDamage(10, 32), 0);
+});
+
+// --- mitigateDamage ---------------------------------------------------------
+
+test('mitigateDamage subtracts flat defense', () => {
+  assert.equal(mitigateDamage(14, 6), 8);
+  assert.equal(mitigateDamage(10, 2), 8);
+});
+
+test('mitigateDamage never returns negative', () => {
+  assert.equal(mitigateDamage(3, 10), 0);
+});
+
+// --- effectiveWindup --------------------------------------------------------
+
+test('effectiveWindup shrinks with higher attack speed', () => {
+  // 300ms windup at 1.2x attack speed -> 250ms
+  assert.equal(effectiveWindup(300, 1.2), 250);
+  // baseline attack speed leaves it unchanged
+  assert.equal(effectiveWindup(300, 1.0), 300);
+});
+
+// --- stamina ----------------------------------------------------------------
+
+test('regenStamina adds regen-per-second scaled by elapsed ms, capped at max', () => {
+  // 20/sec for 500ms = +10
+  assert.equal(regenStamina(50, 100, 20, 500), 60);
+  // caps at max
+  assert.equal(regenStamina(95, 100, 20, 1000), 100);
+});
+
+test('spendStamina deducts when affordable and reports success', () => {
+  assert.deepEqual(spendStamina(100, 16), { ok: true, stamina: 84 });
+});
+
+test('spendStamina refuses when the pool is too low and leaves it unchanged', () => {
+  assert.deepEqual(spendStamina(10, 16), { ok: false, stamina: 10 });
 });
 
 // --- cooldowns --------------------------------------------------------------

@@ -23,6 +23,11 @@ function makeValidCharacter() {
       moveSpeed: 1.0,
       critChance: 0.15,
       critMultiplier: 2.0,
+      defense: 2,
+      maxStamina: 100,
+      staminaRegen: 20,
+      attackSpeed: 1.0,
+      reviveTimeMs: 3000,
     },
     traits: {
       summary: 'A stand-in hero for tests.',
@@ -33,9 +38,9 @@ function makeValidCharacter() {
       { id: 'torch', name: 'Torch', description: 'Lights the way.', cooldownMs: 0 },
     ],
     moves: [
-      { id: 'jab', name: 'Jab', type: 'normal', kind: 'punch', damage: 4, staggerDamage: 3, critEligible: true },
-      { id: 'kick', name: 'Kick', type: 'normal', kind: 'kick', damage: 6, staggerDamage: 5, critEligible: true },
-      { id: 'flash', name: 'Flash', type: 'special', kind: 'power', damage: 12, staggerDamage: 8, critEligible: false, ability: 'torch', cooldownMs: 4000 },
+      { id: 'jab', name: 'Jab', type: 'normal', kind: 'punch', damage: 4, staggerDamage: 3, critEligible: true, staminaCost: 8 },
+      { id: 'kick', name: 'Kick', type: 'normal', kind: 'kick', damage: 6, staggerDamage: 5, critEligible: true, staminaCost: 14 },
+      { id: 'flash', name: 'Flash', type: 'special', kind: 'power', damage: 12, staggerDamage: 8, critEligible: false, ability: 'torch', cooldownMs: 4000, staminaCost: 0 },
     ],
     sayings: Object.fromEntries(
       REQUIRED_SAYING_CATEGORIES.map((cat) => [cat, [`${cat} line`]]),
@@ -222,4 +227,36 @@ test('rejects a special move with a negative cooldown', () => {
   const result = validateCharacter(c);
   assert.equal(result.valid, false);
   assert.ok(result.errors.some((e) => e.includes('cooldown')));
+});
+
+test('rejects negative defense', () => {
+  const c = makeValidCharacter();
+  c.stats.defense = -1;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('defense')));
+});
+
+test('rejects a non-positive maxStamina', () => {
+  const c = makeValidCharacter();
+  c.stats.maxStamina = 0;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('maxStamina')));
+});
+
+test('rejects a non-positive attackSpeed', () => {
+  const c = makeValidCharacter();
+  c.stats.attackSpeed = 0;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('attackSpeed')));
+});
+
+test('rejects a move with negative staminaCost', () => {
+  const c = makeValidCharacter();
+  c.moves[0].staminaCost = -5;
+  const result = validateCharacter(c);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes('staminaCost')));
 });

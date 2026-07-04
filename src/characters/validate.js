@@ -54,21 +54,24 @@ export function validateCharacter(character) {
   }
 
   // --- Combat stats -------------------------------------------------------
+  // Each entry: [field, predicate, message]. Keeps the block short as it grows.
+  const STAT_RULES = [
+    ['maxHealth', (v) => typeof v === 'number' && v > 0, 'must be a number > 0'],
+    ['moveSpeed', (v) => typeof v === 'number' && v > 0, 'must be a number > 0'],
+    ['critChance', (v) => typeof v === 'number' && v >= 0 && v <= 1, 'must be a number between 0 and 1'],
+    ['critMultiplier', (v) => typeof v === 'number' && v >= 1, 'must be a number >= 1'],
+    ['defense', (v) => typeof v === 'number' && v >= 0, 'must be a number >= 0'],
+    ['maxStamina', (v) => typeof v === 'number' && v > 0, 'must be a number > 0'],
+    ['staminaRegen', (v) => typeof v === 'number' && v >= 0, 'must be a number >= 0 (per second)'],
+    ['attackSpeed', (v) => typeof v === 'number' && v > 0, 'must be a number > 0 (windup multiplier)'],
+    ['reviveTimeMs', (v) => typeof v === 'number' && v >= 0, 'must be a number >= 0'],
+  ];
   const stats = character.stats;
   if (stats === null || typeof stats !== 'object') {
-    errors.push('stats must be an object (maxHealth, moveSpeed, critChance, critMultiplier)');
+    errors.push('stats must be an object (maxHealth, moveSpeed, critChance, critMultiplier, defense, maxStamina, staminaRegen, attackSpeed, reviveTimeMs)');
   } else {
-    if (typeof stats.maxHealth !== 'number' || stats.maxHealth <= 0) {
-      errors.push('stats.maxHealth must be a number > 0');
-    }
-    if (typeof stats.moveSpeed !== 'number' || stats.moveSpeed <= 0) {
-      errors.push('stats.moveSpeed must be a number > 0');
-    }
-    if (typeof stats.critChance !== 'number' || stats.critChance < 0 || stats.critChance > 1) {
-      errors.push('stats.critChance must be a number between 0 and 1');
-    }
-    if (typeof stats.critMultiplier !== 'number' || stats.critMultiplier < 1) {
-      errors.push('stats.critMultiplier must be a number >= 1');
+    for (const [field, ok, msg] of STAT_RULES) {
+      if (!ok(stats[field])) errors.push(`stats.${field} ${msg}`);
     }
   }
 
@@ -144,6 +147,9 @@ export function validateCharacter(character) {
       }
       if (typeof move.critEligible !== 'boolean') {
         errors.push(`move ${move.id} critEligible must be a boolean`);
+      }
+      if (typeof move.staminaCost !== 'number' || move.staminaCost < 0) {
+        errors.push(`move ${move.id} staminaCost must be a number >= 0`);
       }
       // A special move draws on one of the hero's abilities and has a cooldown.
       if (move.type === 'special') {

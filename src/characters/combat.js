@@ -60,6 +60,44 @@ export function applyDamage(currentHealth, amount) {
 }
 
 /**
+ * Reduce incoming damage by the defender's flat defense (never below 0).
+ * @returns {number} damage that actually lands
+ */
+export function mitigateDamage(rawDamage, defense) {
+  return Math.max(0, rawDamage - defense);
+}
+
+/**
+ * A move's real wind-up after the attacker's attackSpeed. Higher attackSpeed =
+ * shorter wind-up. Rounded to whole milliseconds.
+ * @returns {number} milliseconds
+ */
+export function effectiveWindup(windupMs, attackSpeed) {
+  return Math.round(windupMs / attackSpeed);
+}
+
+/**
+ * Regenerate stamina over an elapsed span, capped at max.
+ * @param {number} current       current stamina
+ * @param {number} max           max stamina
+ * @param {number} regenPerSec   stamina restored per second
+ * @param {number} elapsedMs     time passed since last tick
+ * @returns {number} new stamina
+ */
+export function regenStamina(current, max, regenPerSec, elapsedMs) {
+  return Math.min(max, current + (regenPerSec * elapsedMs) / 1000);
+}
+
+/**
+ * Attempt to spend stamina on a move.
+ * @returns {{ ok: boolean, stamina: number }} ok=false leaves stamina unchanged
+ */
+export function spendStamina(current, cost) {
+  if (current < cost) return { ok: false, stamina: current };
+  return { ok: true, stamina: current - cost };
+}
+
+/**
  * Track per-move cooldowns against an externally-supplied clock (`now` in ms).
  * Time is passed in rather than read from a global clock so the same tracker
  * runs deterministically on both clients and the server.

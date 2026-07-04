@@ -4,7 +4,8 @@
   "description": "Two-player online co-op dungeon/puzzle/action game (16-bit retro).",
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "start": "node scripts/serve.js"
   },
   "license": "MIT"
 }

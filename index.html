@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Sundering Spire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/ui/styles.css" />
+</head>
+<body>
+  <!-- The sundering seam: the signature split between light (Sela) and shadow (Kade) -->
+  <div class="seam" aria-hidden="true"></div>
+
+  <main id="app">
+    <!-- ============================ TITLE ============================ -->
+    <section class="screen is-active" data-screen="title">
+      <div class="title-stack">
+        <p class="eyebrow">Two keepers · one ascent</p>
+        <h1 class="game-title">
+          <span class="t-light">THE&nbsp;SUNDERING</span><span class="t-shadow">SPIRE</span>
+        </h1>
+        <p class="tagline">Light cannot climb without shadow. Shadow cannot see without light.</p>
+
+        <nav class="menu" aria-label="Main menu">
+          <button class="btn btn-play" data-event="PLAY">▶ Play</button>
+          <button class="btn" data-event="OPEN_CONTROLS">Controls</button>
+        </nav>
+
+        <div class="roster">
+          <div class="hero hero-sela">
+            <span class="hero-mark">☀</span>
+            <span class="hero-name">Sela</span>
+            <span class="hero-role">the Lumen · light / present</span>
+          </div>
+          <div class="hero hero-kade">
+            <span class="hero-mark">☾</span>
+            <span class="hero-name">Kade</span>
+            <span class="hero-role">the Echo · shadow / past</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================== CONTROLS ========================== -->
+    <section class="screen" data-screen="controls">
+      <div class="panel">
+        <h2 class="panel-title">Controls</h2>
+        <div class="controls-grid">
+          <div class="ctrl-col ctrl-sela">
+            <h3>Player 1 · Sela</h3>
+            <dl>
+              <dt>Move</dt><dd>W A S D</dd>
+              <dt>Light attack</dt><dd>J</dd>
+              <dt>Heavy / kick</dt><dd>K</dd>
+              <dt>Dash</dt><dd>L Shift</dd>
+              <dt>Power (Light-Flash)</dt><dd>U</dd>
+              <dt>Call for help</dt><dd>Q</dd>
+            </dl>
+          </div>
+          <div class="ctrl-col ctrl-kade">
+            <h3>Player 2 · Kade</h3>
+            <dl>
+              <dt>Move</dt><dd>↑ ← ↓ →</dd>
+              <dt>Light attack</dt><dd>. (period)</dd>
+              <dt>Heavy / sweep</dt><dd>/ (slash)</dd>
+              <dt>Grab</dt><dd>R Shift</dd>
+              <dt>Power (Phase-Strike)</dt><dd>' (quote)</dd>
+              <dt>Call for help</dt><dd>Enter</dd>
+            </dl>
+          </div>
+        </div>
+        <p class="controls-note">Pause any time with <kbd>Esc</kbd>. Rebinding comes later.</p>
+        <button class="btn" data-event="BACK">◂ Back</button>
+      </div>
+    </section>
+
+    <!-- =========================== PLAYING =========================== -->
+    <section class="screen" data-screen="playing">
+      <div class="hud">
+        <div class="hud-bars">
+          <div class="bar bar-sela">
+            <span class="bar-label">Sela</span>
+            <div class="bar-track"><div class="bar-fill" data-hp="sela"></div></div>
+          </div>
+          <div class="bar bar-kade">
+            <span class="bar-label">Kade</span>
+            <div class="bar-track"><div class="bar-fill" data-hp="kade"></div></div>
+          </div>
+        </div>
+        <div class="hud-right">
+          <span class="floor-badge">Floor <b data-stat="floor">1</b> / 12</span>
+          <span class="score-badge">Score <b data-stat="score">0</b></span>
+          <button class="btn btn-small" data-event="PAUSE">❚❚ Pause</button>
+        </div>
+      </div>
+
+      <div class="stage">
+        <p class="stage-tag">Prototype sandbox</p>
+        <p class="stage-note">
+          The real-time floor isn't built yet. These buttons fire the same events the
+          game loop will, so you can watch the live stats + goal systems respond.
+        </p>
+        <div class="sim-buttons">
+          <button class="btn btn-small" data-sim="hit">Deal a hit</button>
+          <button class="btn btn-small" data-sim="crit">Land a crit</button>
+          <button class="btn btn-small" data-sim="takedown">Co-op takedown</button>
+          <button class="btn btn-small" data-sim="hurt">Take a hit</button>
+          <button class="btn btn-small" data-sim="floor">Clear the floor</button>
+          <button class="btn btn-small btn-danger" data-sim="down">Get downed</button>
+        </div>
+        <ul class="live-stats">
+          <li>Enemies felled <b data-stat="enemiesDefeated">0</b></li>
+          <li>Takedowns <b data-stat="takedowns">0</b></li>
+          <li>Damage dealt <b data-stat="damageDealt">0</b></li>
+          <li>Crits <b data-stat="crits">0</b></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- =========================== PAUSED =========================== -->
+    <section class="screen screen-overlay" data-screen="paused">
+      <div class="panel panel-narrow">
+        <h2 class="panel-title">Paused</h2>
+        <nav class="menu" aria-label="Pause menu">
+          <button class="btn btn-play" data-event="RESUME">▶ Resume</button>
+          <button class="btn" data-event="OPEN_CONTROLS">Controls</button>
+          <button class="btn" data-event="RESTART">Restart run</button>
+          <button class="btn btn-danger" data-event="QUIT">Quit to title</button>
+        </nav>
+      </div>
+    </section>
+
+    <!-- ========================== SUMMARY ========================== -->
+    <section class="screen" data-screen="summary">
+      <div class="panel">
+        <h2 class="panel-title">Run Over</h2>
+        <p class="summary-score">Final score <b data-stat="score">0</b></p>
+        <div class="summary-grid" data-goals></div>
+        <nav class="menu menu-row">
+          <button class="btn btn-play" data-event="RETRY">Try again</button>
+          <button class="btn" data-event="CONTINUE">Title screen</button>
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="src/ui/app.js"></script>
+</body>
+</html>
