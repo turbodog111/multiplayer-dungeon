@@ -1,0 +1,102 @@
+{
+  "characterId": "sela",
+  "visualDirection": "torch-guardian",
+  "frameSizeTarget": {
+    "width": 48,
+    "height": 48
+  },
+  "draftNote": "Generated draft sheets must be cleaned into exact frame grids before runtime use.",
+  "columnOrder": ["down", "left", "right", "up"],
+  "sheets": {
+    "movement": {
+      "image": "drafts/sela-torch-guardian-movement-draft-v1.png",
+      "rowOrder": ["idle", "walk_1", "walk_2", "walk_3"],
+      "animations": {
+        "idle_down": [{ "column": "down", "row": "idle", "durationMs": 240 }],
+        "idle_left": [{ "column": "left", "row": "idle", "durationMs": 240 }],
+        "idle_right": [{ "column": "right", "row": "idle", "durationMs": 240 }],
+        "idle_up": [{ "column": "up", "row": "idle", "durationMs": 240 }],
+        "walk_down": [
+          { "column": "down", "row": "walk_1", "durationMs": 100 },
+          { "column": "down", "row": "walk_2", "durationMs": 100 },
+          { "column": "down", "row": "walk_3", "durationMs": 100 }
+        ],
+        "walk_left": [
+          { "column": "left", "row": "walk_1", "durationMs": 100 },
+          { "column": "left", "row": "walk_2", "durationMs": 100 },
+          { "column": "left", "row": "walk_3", "durationMs": 100 }
+        ],
+        "walk_right": [
+          { "column": "right", "row": "walk_1", "durationMs": 100 },
+          { "column": "right", "row": "walk_2", "durationMs": 100 },
+          { "column": "right", "row": "walk_3", "durationMs": 100 }
+        ],
+        "walk_up": [
+          { "column": "up", "row": "walk_1", "durationMs": 100 },
+          { "column": "up", "row": "walk_2", "durationMs": 100 },
+          { "column": "up", "row": "walk_3", "durationMs": 100 }
+        ]
+      }
+    },
+    "combat": {
+      "image": "drafts/sela-torch-guardian-combat-draft-v1.png",
+      "rowOrder": ["windup", "impact", "follow_through", "recovery"],
+      "animations": {
+        "baton_attack_down": [
+          { "column": "down", "row": "windup", "durationMs": 70 },
+          { "column": "down", "row": "impact", "durationMs": 80 },
+          { "column": "down", "row": "follow_through", "durationMs": 80 },
+          { "column": "down", "row": "recovery", "durationMs": 90 }
+        ],
+        "baton_attack_left": [
+          { "column": "left", "row": "windup", "durationMs": 70 },
+          { "column": "left", "row": "impact", "durationMs": 80 },
+          { "column": "left", "row": "follow_through", "durationMs": 80 },
+          { "column": "left", "row": "recovery", "durationMs": 90 }
+        ],
+        "baton_attack_right": [
+          { "column": "right", "row": "windup", "durationMs": 70 },
+          { "column": "right", "row": "impact", "durationMs": 80 },
+          { "column": "right", "row": "follow_through", "durationMs": 80 },
+          { "column": "right", "row": "recovery", "durationMs": 90 }
+        ],
+        "baton_attack_up": [
+          { "column": "up", "row": "windup", "durationMs": 70 },
+          { "column": "up", "row": "impact", "durationMs": 80 },
+          { "column": "up", "row": "follow_through", "durationMs": 80 },
+          { "column": "up", "row": "recovery", "durationMs": 90 }
+        ]
+      }
+    },
+    "lightPowers": {
+      "image": "drafts/sela-torch-guardian-light-powers-draft-v1.png",
+      "rowOrder": ["torch_cast_windup", "torch_cast_burst", "beacon_plant", "beam_weave"],
+      "animations": {
+        "torch_cast_down": [
+          { "column": "down", "row": "torch_cast_windup", "durationMs": 100 },
+          { "column": "down", "row": "torch_cast_burst", "durationMs": 120 }
+        ],
+        "torch_cast_left": [
+          { "column": "left", "row": "torch_cast_windup", "durationMs": 100 },
+          { "column": "left", "row": "torch_cast_burst", "durationMs": 120 }
+        ],
+        "torch_cast_right": [
+          { "column": "right", "row": "torch_cast_windup", "durationMs": 100 },
+          { "column": "right", "row": "torch_cast_burst", "durationMs": 120 }
+        ],
+        "torch_cast_up": [
+          { "column": "up", "row": "torch_cast_windup", "durationMs": 100 },
+          { "column": "up", "row": "torch_cast_burst", "durationMs": 120 }
+        ],
+        "beacon_plant_down": [{ "column": "down", "row": "beacon_plant", "durationMs": 180 }],
+        "beacon_plant_left": [{ "column": "left", "row": "beacon_plant", "durationMs": 180 }],
+        "beacon_plant_right": [{ "column": "right", "row": "beacon_plant", "durationMs": 180 }],
+        "beacon_plant_up": [{ "column": "up", "row": "beacon_plant", "durationMs": 180 }],
+        "beam_weave_down": [{ "column": "down", "row": "beam_weave", "durationMs": 140 }],
+        "beam_weave_left": [{ "column": "left", "row": "beam_weave", "durationMs": 140 }],
+        "beam_weave_right": [{ "column": "right", "row": "beam_weave", "durationMs": 140 }],
+        "beam_weave_up": [{ "column": "up", "row": "beam_weave", "durationMs": 140 }]
+      }
+    }
+  }
+}

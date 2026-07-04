@@ -1,0 +1,75 @@
+{
+  "characterId": "sela",
+  "effectSet": "light-and-anchor-drafts",
+  "frameSizeTarget": {
+    "width": 48,
+    "height": 48
+  },
+  "draftNote": "Generated draft effect sheets must be cleaned into exact frame grids before runtime use.",
+  "sheets": {
+    "torchbearer": {
+      "image": "drafts/sela-torchbearer-effects-draft-v1.png",
+      "columns": 4,
+      "rows": 4,
+      "rowOrder": ["light_cone_shimmer", "light_pulse_burst", "hidden_rune_reveal", "platform_edge_reveal"],
+      "animations": {
+        "light_cone_shimmer": [
+          { "row": "light_cone_shimmer", "column": 0, "durationMs": 80 },
+          { "row": "light_cone_shimmer", "column": 1, "durationMs": 80 },
+          { "row": "light_cone_shimmer", "column": 2, "durationMs": 80 },
+          { "row": "light_cone_shimmer", "column": 3, "durationMs": 80 }
+        ],
+        "light_pulse_burst": [
+          { "row": "light_pulse_burst", "column": 0, "durationMs": 70 },
+          { "row": "light_pulse_burst", "column": 1, "durationMs": 70 },
+          { "row": "light_pulse_burst", "column": 2, "durationMs": 70 },
+          { "row": "light_pulse_burst", "column": 3, "durationMs": 90 }
+        ],
+        "hidden_rune_reveal": [
+          { "row": "hidden_rune_reveal", "column": 0, "durationMs": 80 },
+          { "row": "hidden_rune_reveal", "column": 1, "durationMs": 80 },
+          { "row": "hidden_rune_reveal", "column": 2, "durationMs": 80 },
+          { "row": "hidden_rune_reveal", "column": 3, "durationMs": 120 }
+        ],
+        "platform_edge_reveal": [
+          { "row": "platform_edge_reveal", "column": 0, "durationMs": 80 },
+          { "row": "platform_edge_reveal", "column": 1, "durationMs": 80 },
+          { "row": "platform_edge_reveal", "column": 2, "durationMs": 80 },
+          { "row": "platform_edge_reveal", "column": 3, "durationMs": 120 }
+        ]
+      }
+    },
+    "anchorBeacon": {
+      "image": "drafts/sela-anchor-beacon-effects-draft-v1.png",
+      "columns": 4,
+      "rows": 4,
+      "rowOrder": ["beacon_seed", "beacon_rise", "anchor_pulse", "beacon_recall"],
+      "animations": {
+        "beacon_seed": [
+          { "row": "beacon_seed", "column": 0, "durationMs": 80 },
+          { "row": "beacon_seed", "column": 1, "durationMs": 80 },
+          { "row": "beacon_seed", "column": 2, "durationMs": 80 },
+          { "row": "beacon_seed", "column": 3, "durationMs": 100 }
+        ],
+        "beacon_rise": [
+          { "row": "beacon_rise", "column": 0, "durationMs": 80 },
+          { "row": "beacon_rise", "column": 1, "durationMs": 80 },
+          { "row": "beacon_rise", "column": 2, "durationMs": 80 },
+          { "row": "beacon_rise", "column": 3, "durationMs": 120 }
+        ],
+        "anchor_pulse": [
+          { "row": "anchor_pulse", "column": 0, "durationMs": 100 },
+          { "row": "anchor_pulse", "column": 1, "durationMs": 100 },
+          { "row": "anchor_pulse", "column": 2, "durationMs": 100 },
+          { "row": "anchor_pulse", "column": 3, "durationMs": 100 }
+        ],
+        "beacon_recall": [
+          { "row": "beacon_recall", "column": 0, "durationMs": 80 },
+          { "row": "beacon_recall", "column": 1, "durationMs": 80 },
+          { "row": "beacon_recall", "column": 2, "durationMs": 80 },
+          { "row": "beacon_recall", "column": 3, "durationMs": 100 }
+        ]
+      }
+    }
+  }
+}
