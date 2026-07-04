@@ -32,8 +32,10 @@ const ATTACK_KEYS = {
 const MIN_ATTACK_GAP_MS = 240; // rate-limit even 0-cooldown normals
 const ENEMY_ATTACK_GAP_MS = 900;
 const CONTACT_PAD = 4;
-const HERO_DRAW_SIZE = 46;
+const HERO_DRAW_HEIGHT = 66;
+const HERO_BAR_WIDTH = 48;
 const SELA_EFFECT_DRAW_SIZE = 76;
+const SELA_FRAME_PADDING = 3;
 
 // These match assets/sprites/heroes/sela/sela-draft.animations.json. The draft
 // PNGs are not final atlases yet, but their 4x4 layout is stable enough for the
@@ -74,11 +76,114 @@ const SELA_ACTION_ANIMS = {
   },
 };
 
+function atlasColumnCount(atlas) {
+  return Array.isArray(atlas.columns) ? atlas.columns.length : atlas.columns;
+}
+
+function atlasFrameKey(row, col) {
+  return row + ':' + col;
+}
+
+function isChromaGreenPixel(r, g, b, a) {
+  if (a < 16) return true;
+  const strongestNonGreen = Math.max(r, b);
+  return g > 120 && g > r * 1.25 && g > b * 1.25 && g - strongestNonGreen > 45;
+}
+
+function atlasFrameBounds(atlas, col, row) {
+  const cols = atlasColumnCount(atlas);
+  const rows = atlas.rows.length;
+  const width = atlas.image.naturalWidth;
+  const height = atlas.image.naturalHeight;
+  const x0 = Math.round((width * col) / cols);
+  const x1 = Math.round((width * (col + 1)) / cols);
+  const y0 = Math.round((height * row) / rows);
+  const y1 = Math.round((height * (row + 1)) / rows);
+  return { sx: x0, sy: y0, sw: Math.max(1, x1 - x0), sh: Math.max(1, y1 - y0) };
+}
+
+function extractTransparentFrame(sheetCtx, bounds) {
+  const imageData = sheetCtx.getImageData(bounds.sx, bounds.sy, bounds.sw, bounds.sh);
+  const { data, width, height } = imageData;
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const index = (y * width + x) * 4;
+      const r = data[index];
+      const g = data[index + 1];
+      const b = data[index + 2];
+      const a = data[index + 3];
+      if (isChromaGreenPixel(r, g, b, a)) {
+        data[index + 3] = 0;
+        continue;
+      }
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+
+  if (maxX < minX || maxY < minY) return null;
+
+  minX = Math.max(0, minX - SELA_FRAME_PADDING);
+  minY = Math.max(0, minY - SELA_FRAME_PADDING);
+  maxX = Math.min(width - 1, maxX + SELA_FRAME_PADDING);
+  maxY = Math.min(height - 1, maxY + SELA_FRAME_PADDING);
+
+  const cleanedCell = document.createElement('canvas');
+  cleanedCell.width = width;
+  cleanedCell.height = height;
+  const cleanedCtx = cleanedCell.getContext('2d');
+  cleanedCtx.imageSmoothingEnabled = false;
+  cleanedCtx.putImageData(imageData, 0, 0);
+
+  const cropWidth = maxX - minX + 1;
+  const cropHeight = maxY - minY + 1;
+  const frameCanvas = document.createElement('canvas');
+  frameCanvas.width = cropWidth;
+  frameCanvas.height = cropHeight;
+  const frameCtx = frameCanvas.getContext('2d');
+  frameCtx.imageSmoothingEnabled = false;
+  frameCtx.drawImage(cleanedCell, minX, minY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+  return frameCanvas;
+}
+
+function buildAtlasFrameCache(atlas) {
+  if (typeof document === 'undefined' || !atlas.image?.naturalWidth) return;
+  const sheetCanvas = document.createElement('canvas');
+  sheetCanvas.width = atlas.image.naturalWidth;
+  sheetCanvas.height = atlas.image.naturalHeight;
+  const sheetCtx = sheetCanvas.getContext('2d', { willReadFrequently: true });
+  sheetCtx.imageSmoothingEnabled = false;
+  sheetCtx.drawImage(atlas.image, 0, 0);
+
+  const cols = atlasColumnCount(atlas);
+  atlas.frames = new Map();
+  for (let row = 0; row < atlas.rows.length; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const frameCanvas = extractTransparentFrame(sheetCtx, atlasFrameBounds(atlas, col, row));
+      if (frameCanvas) atlas.frames.set(atlasFrameKey(row, col), frameCanvas);
+    }
+  }
+}
+
 function makeAtlas(def) {
-  const atlas = { ...def, image: null, ready: false };
+  const atlas = { ...def, image: null, frames: new Map(), ready: false };
   if (typeof Image !== 'undefined') {
     atlas.image = new Image();
-    atlas.image.onload = () => { atlas.ready = true; };
+    atlas.image.onload = () => {
+      try {
+        buildAtlasFrameCache(atlas);
+        atlas.ready = atlas.frames.size > 0;
+      } catch {
+        atlas.ready = false;
+      }
+    };
     atlas.image.onerror = () => { atlas.ready = false; };
     atlas.image.src = def.src;
   }
@@ -298,35 +403,34 @@ export function createGame(canvas, { onGameOver }) {
     return atlas.rows.indexOf(row);
   }
 
-  function drawAtlasFrame(atlas, frame, x, y, size, { alpha = 1, glow = null } = {}) {
-    if (!atlas?.ready || !atlas.image?.naturalWidth) return false;
+  function drawAtlasFrame(atlas, frame, x, y, height, { alpha = 1, glow = null, anchor = 'center' } = {}) {
+    if (!atlas?.ready || !atlas.frames) return false;
     const cols = columnCount(atlas);
     const rows = atlas.rows.length;
     const col = columnIndex(atlas, frame.column);
     const row = rowIndex(atlas, frame.row);
     if (col < 0 || row < 0 || col >= cols || row >= rows) return false;
 
-    const sw = atlas.image.naturalWidth / cols;
-    const sh = atlas.image.naturalHeight / rows;
+    const source = atlas.frames.get(atlasFrameKey(row, col));
+    if (!source?.width || !source?.height) return false;
+
+    const drawHeight = height;
+    const drawWidth = Math.max(1, Math.round((source.width / source.height) * drawHeight));
+    const dx = Math.round(x - drawWidth / 2);
+    const dy = anchor === 'bottom'
+      ? Math.round(y - drawHeight)
+      : Math.round(y - drawHeight / 2);
+
     ctx.save();
     ctx.globalAlpha *= alpha;
+    ctx.imageSmoothingEnabled = false;
     if (glow) {
       ctx.shadowColor = glow.color;
       ctx.shadowBlur = glow.blur;
     }
-    ctx.drawImage(
-      atlas.image,
-      col * sw,
-      row * sh,
-      sw,
-      sh,
-      Math.round(x - size / 2),
-      Math.round(y - size / 2),
-      size,
-      size,
-    );
+    ctx.drawImage(source, dx, dy, drawWidth, drawHeight);
     ctx.restore();
-    return true;
+    return { x: dx, y: dy, width: drawWidth, height: drawHeight };
   }
 
   function heroDirection(hero) {
@@ -400,29 +504,37 @@ export function createGame(canvas, { onGameOver }) {
   function drawSelaHero(hero, hue) {
     const frame = currentSelaFrame(hero);
     const bob = hero.moving ? Math.sin(clock / 90) * 1.5 : 0;
-    const drewSprite = drawAtlasFrame(
+    const spriteBox = drawAtlasFrame(
       frame.atlas,
       frame,
       hero.x,
-      hero.y - 4 + bob,
-      HERO_DRAW_SIZE,
-      { glow: { color: '#f5b942', blur: 6 } },
+      hero.y + hero.radius + 4 + bob,
+      HERO_DRAW_HEIGHT,
+      { glow: { color: '#f5b942', blur: 6 }, anchor: 'bottom' },
     );
-    if (!drewSprite) drawFallbackHero(hero, hue);
-    else drawFacingTick(hero);
+    if (!spriteBox) {
+      drawFallbackHero(hero, hue);
+      return null;
+    }
+    return spriteBox;
   }
 
   function drawHero(id, hero) {
     const hue = id === 'sela' ? '#f5b942' : '#7b5cff';
     ctx.globalAlpha = hero.downed ? 0.35 : 1;
+    let spriteBox = null;
     if (id === 'sela') {
       drawSelaEffect(hero);
-      drawSelaHero(hero, hue);
+      spriteBox = drawSelaHero(hero, hue);
     } else {
       drawFallbackHero(hero, hue);
     }
-    drawBar(hero.x - hero.radius, hero.y - hero.radius - 9, hero.radius * 2, 4, hero.health / hero.maxHealth, hue);
-    drawBar(hero.x - hero.radius, hero.y - hero.radius - 4, hero.radius * 2, 2, hero.stamina / hero.def.stats.maxStamina, '#5be3c0');
+
+    const barWidth = spriteBox ? HERO_BAR_WIDTH : hero.radius * 2;
+    const barX = hero.x - barWidth / 2;
+    const barY = spriteBox ? spriteBox.y - 9 : hero.y - hero.radius - 9;
+    drawBar(barX, barY, barWidth, 4, hero.health / hero.maxHealth, hue);
+    drawBar(barX, barY + 5, barWidth, 2, hero.stamina / hero.def.stats.maxStamina, '#5be3c0');
     ctx.globalAlpha = 1;
   }
 
