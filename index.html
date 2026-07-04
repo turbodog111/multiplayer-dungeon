@@ -79,16 +79,6 @@
     <!-- =========================== PLAYING =========================== -->
     <section class="screen" data-screen="playing">
       <div class="hud">
-        <div class="hud-bars">
-          <div class="bar bar-sela">
-            <span class="bar-label">Sela</span>
-            <div class="bar-track"><div class="bar-fill" data-hp="sela"></div></div>
-          </div>
-          <div class="bar bar-kade">
-            <span class="bar-label">Kade</span>
-            <div class="bar-track"><div class="bar-fill" data-hp="kade"></div></div>
-          </div>
-        </div>
         <div class="hud-right">
           <span class="floor-badge">Floor <b data-stat="floor">1</b> / 12</span>
           <span class="score-badge">Score <b data-stat="score">0</b></span>
@@ -96,27 +86,13 @@
         </div>
       </div>
 
-      <div class="stage">
-        <p class="stage-tag">Prototype sandbox</p>
-        <p class="stage-note">
-          The real-time floor isn't built yet. These buttons fire the same events the
-          game loop will, so you can watch the live stats + goal systems respond.
-        </p>
-        <div class="sim-buttons">
-          <button class="btn btn-small" data-sim="hit">Deal a hit</button>
-          <button class="btn btn-small" data-sim="crit">Land a crit</button>
-          <button class="btn btn-small" data-sim="takedown">Co-op takedown</button>
-          <button class="btn btn-small" data-sim="hurt">Take a hit</button>
-          <button class="btn btn-small" data-sim="floor">Clear the floor</button>
-          <button class="btn btn-small btn-danger" data-sim="down">Get downed</button>
-        </div>
-        <ul class="live-stats">
-          <li>Enemies felled <b data-stat="enemiesDefeated">0</b></li>
-          <li>Takedowns <b data-stat="takedowns">0</b></li>
-          <li>Damage dealt <b data-stat="damageDealt">0</b></li>
-          <li>Crits <b data-stat="crits">0</b></li>
-        </ul>
-      </div>
+      <canvas id="game-canvas" width="720" height="420" aria-label="The dungeon room"></canvas>
+
+      <p class="play-hint">
+        <b class="p1">P1 Sela</b> — WASD move · <kbd>J</kbd> jab · <kbd>K</kbd> kick · <kbd>U</kbd> Light-Flash
+        &nbsp;•&nbsp;
+        <b class="p2">P2 Kade</b> — Arrows move · <kbd>,</kbd> strike · <kbd>.</kbd> sweep · <kbd>/</kbd> Phase-Strike
+      </p>
     </section>
 
     <!-- =========================== PAUSED =========================== -->

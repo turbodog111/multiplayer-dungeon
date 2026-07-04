@@ -3,11 +3,13 @@
 // Add an enemy by importing its definition and adding it to ENEMIES. Keep
 // definitions data-only; AI/behavior lives in the systems that consume them.
 
+import { gloomWhelp } from './gloom-whelp.js';
 import { stoneSentry } from './stone-sentry.js';
 import { wraith } from './wraith.js';
 import { brambleHulk } from './bramble-hulk.js';
 
 export const ENEMIES = {
+  [gloomWhelp.id]: gloomWhelp,
   [stoneSentry.id]: stoneSentry,
   [wraith.id]: wraith,
   [brambleHulk.id]: brambleHulk,
@@ -23,4 +25,4 @@ export function listEnemies() {
   return Object.values(ENEMIES);
 }
 
-export { stoneSentry, wraith, brambleHulk };
+export { gloomWhelp, stoneSentry, wraith, brambleHulk };

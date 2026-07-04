@@ -191,38 +191,29 @@ kbd {
   border: 1px solid var(--stone-line); padding: 0.15rem 0.4rem; color: var(--ink);
 }
 
-/* --- HUD + stage (playing) ------------------------------------------------- */
-[data-screen="playing"] { align-content: start; gap: 2rem; }
+/* --- HUD + canvas (playing) ------------------------------------------------ */
+[data-screen="playing"] { align-content: start; gap: 1rem; }
 .hud {
-  width: min(960px, 96vw);
-  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-  flex-wrap: wrap;
+  width: min(720px, 96vw);
+  display: flex; justify-content: flex-end; align-items: center; gap: 1rem;
 }
-.hud-bars { display: grid; gap: 0.5rem; flex: 1 1 320px; }
-.bar { display: grid; grid-template-columns: 4rem 1fr; align-items: center; gap: 0.6rem; }
-.bar-label { font-family: var(--display); font-size: 0.6rem; text-align: left; }
-.bar-sela .bar-label { color: var(--amber); }
-.bar-kade .bar-label { color: var(--violet); }
-.bar-track { height: 18px; background: var(--void-2); border: 2px solid var(--stone-line); overflow: hidden; }
-.bar-fill { height: 100%; width: 100%; transition: width 0.25s steps(6); }
-.bar-sela .bar-fill { background: linear-gradient(90deg, var(--amber), var(--amber-glo)); }
-.bar-kade .bar-fill { background: linear-gradient(90deg, var(--violet), var(--violet-glo)); }
-
 .hud-right { display: flex; align-items: center; gap: 1rem; font-family: var(--display); font-size: 0.6rem; flex-wrap: wrap; }
 .floor-badge b, .score-badge b { color: var(--amber-glo); }
 
-.stage {
-  width: min(760px, 94vw);
-  background: var(--void-2);
-  border: 2px solid var(--stone-line);
-  padding: 1.6rem;
-  display: grid; gap: 1rem;
+#game-canvas {
+  width: min(720px, 96vw);
+  height: auto;
+  aspect-ratio: 720 / 420;
+  background: #160f28;
+  border: 3px solid var(--stone-line);
+  box-shadow: 0 0 30px rgba(123, 92, 255, 0.15), var(--pixel) var(--pixel) 0 0 #000;
+  image-rendering: pixelated;
+  touch-action: none;
 }
-.stage-tag { font-family: var(--display); font-size: 0.6rem; color: var(--violet-glo); letter-spacing: 0.2em; margin: 0; }
-.stage-note { font-size: 1.2rem; color: var(--ink-dim); margin: 0; }
-.sim-buttons { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; }
-.live-stats { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 1.2rem; justify-content: center; font-size: 1.2rem; }
-.live-stats b { color: var(--amber-glo); font-family: var(--display); font-size: 0.7rem; margin-left: 0.3rem; }
+
+.play-hint { font-size: 1.15rem; color: var(--ink-dim); margin: 0; max-width: 720px; }
+.play-hint .p1 { color: var(--amber); }
+.play-hint .p2 { color: var(--violet); }
 
 /* --- summary --------------------------------------------------------------- */
 .summary-score { font-size: 1.6rem; margin: 0; }

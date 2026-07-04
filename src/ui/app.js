@@ -1,51 +1,50 @@
-// Front-end wiring for The Sundering Spire shell.
+// Front-end wiring for The Sundering Spire.
 //
-// This file is glue: it connects the tested logic modules (screen machine, run
-// stats, goals, character/enemy data) to the DOM. All rules live in those
-// modules; here we only read events and paint the result.
+// Connects the tested screen machine to the DOM menus and to the real-time game
+// (game.js). Screen transitions drive the game: entering PLAYING fresh starts a
+// run; from PAUSED it resumes; leaving to title/summary stops it.
 
 import { createScreenMachine, SCREENS } from './screens.js';
-import { createRunStats } from '../game/stats.js';
+import { createGame } from './game.js';
 import { evaluateGoals, TOWER_GOALS } from '../game/goals.js';
-import { sela, kade } from '../characters/index.js';
-import { getEnemy } from '../enemies/index.js';
 
 const machine = createScreenMachine();
+const canvas = document.getElementById('game-canvas');
+const game = createGame(canvas, {
+  onGameOver: () => machine.send('GAME_OVER'),
+});
 
-// --- run state (recreated each time a run starts) ---------------------------
-let run = createRunStats();
-// Live hero health for the sandbox HUD (real game loop will own this later).
-let health = { sela: sela.stats.maxHealth, kade: kade.stats.maxHealth };
-let floor = 1;
-
-function startFreshRun() {
-  run = createRunStats();
-  health = { sela: sela.stats.maxHealth, kade: kade.stats.maxHealth };
-  floor = 1;
-  paintPlaying();
-}
+// Dev handle — lets tooling drive/inspect the game. Harmless in production.
+window.__spire = { machine, game };
 
 // --- screen switching -------------------------------------------------------
 const screens = [...document.querySelectorAll('.screen')];
+let previous = machine.state;
 
 function showScreen(name) {
-  for (const el of screens) {
-    el.classList.toggle('is-active', el.dataset.screen === name);
-  }
-  if (name === SCREENS.SUMMARY) paintSummary();
+  for (const el of screens) el.classList.toggle('is-active', el.dataset.screen === name);
 }
 
-machine.subscribe(showScreen);
+machine.subscribe((state) => {
+  showScreen(state);
+  if (state === SCREENS.PLAYING) {
+    if (previous === SCREENS.PAUSED) game.resume();
+    else game.start();
+  } else if (state === SCREENS.PAUSED) {
+    game.pause();
+  } else if (state === SCREENS.SUMMARY) {
+    paintSummary();
+    game.stop();
+  } else if (state === SCREENS.TITLE) {
+    game.stop();
+  }
+  previous = state;
+});
 
-// Wire every [data-event] button to send its event to the machine.
+// Wire every [data-event] button to the machine.
 for (const btn of document.querySelectorAll('[data-event]')) {
   btn.addEventListener('click', () => machine.send(btn.dataset.event));
 }
-
-// Starting or retrying a run resets the sandbox.
-document.querySelector('[data-event="PLAY"]').addEventListener('click', startFreshRun);
-document.querySelector('[data-event="RETRY"]').addEventListener('click', startFreshRun);
-document.querySelector('[data-event="RESTART"]').addEventListener('click', startFreshRun);
 
 // --- keyboard: Esc pauses/resumes, Enter plays from the title ---------------
 document.addEventListener('keydown', (e) => {
@@ -54,70 +53,15 @@ document.addEventListener('keydown', (e) => {
     else if (machine.state === SCREENS.PAUSED) machine.send('RESUME');
   } else if (e.key === 'Enter' && machine.state === SCREENS.TITLE) {
     machine.send('PLAY');
-    startFreshRun();
   }
 });
 
-// --- the prototype sandbox: fire real stat events ---------------------------
-const SIM = {
-  hit() {
-    const dmg = 8;
-    run.recordDamageDealt(dmg);
-  },
-  crit() {
-    run.recordDamageDealt(32);
-    run.recordCrit();
-  },
-  takedown() {
-    // A full co-op takedown: felled enemy + the takedown bonus.
-    run.recordEnemyDefeated(getEnemy('stone_sentry'));
-    run.recordTakedown();
-  },
-  hurt() {
-    const dmg = 14;
-    run.recordDamageTaken(dmg);
-    health.sela = Math.max(0, health.sela - dmg);
-  },
-  floor() {
-    run.recordFloorCleared();
-    floor = Math.min(12, floor + 1);
-  },
-  down() {
-    run.recordDeath();
-    health.sela = 0;
-    machine.send('GAME_OVER');
-  },
-};
-
-for (const btn of document.querySelectorAll('[data-sim]')) {
-  btn.addEventListener('click', () => {
-    SIM[btn.dataset.sim]?.();
-    paintPlaying();
-  });
-}
-
-// --- painting ---------------------------------------------------------------
-function setText(sel, value) {
-  for (const el of document.querySelectorAll(sel)) el.textContent = value;
-}
-
-function paintPlaying() {
-  const s = run.snapshot();
-  setText('[data-stat="score"]', s.score);
-  setText('[data-stat="enemiesDefeated"]', s.enemiesDefeated);
-  setText('[data-stat="takedowns"]', s.takedowns);
-  setText('[data-stat="damageDealt"]', s.damageDealt);
-  setText('[data-stat="crits"]', s.crits);
-  setText('[data-stat="floor"]', floor);
-
-  const pct = (id) => `${Math.round((health[id] / (id === 'sela' ? sela : kade).stats.maxHealth) * 100)}%`;
-  document.querySelector('[data-hp="sela"]').style.width = pct('sela');
-  document.querySelector('[data-hp="kade"]').style.width = pct('kade');
-}
-
+// --- end-of-run summary -----------------------------------------------------
 function paintSummary() {
-  const s = run.snapshot();
-  setText('[data-screen="summary"] [data-stat="score"]', s.score);
+  const s = game.snapshot();
+  const scoreEl = document.querySelector('[data-screen="summary"] [data-stat="score"]');
+  if (scoreEl) scoreEl.textContent = s.score;
+
   const grid = document.querySelector('[data-goals]');
   grid.innerHTML = '';
   for (const g of evaluateGoals(TOWER_GOALS, s)) {
@@ -133,6 +77,3 @@ function paintSummary() {
     grid.appendChild(el);
   }
 }
-
-// initial paint
-paintPlaying();
